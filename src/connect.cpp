@@ -43,7 +43,7 @@ extern "C" {
 
   __declspec(dllexport) SEXP R_connect(SEXP className, SEXP raiseError);
 
-  __declspec(dllexport) SEXP R_create(SEXP className);
+  __declspec(dllexport) SEXP R_create(SEXP className, SEXP scontext);
 
 #ifdef UNUSED
   __declspec(dllexport) SEXP R_invoke(SEXP obj, SEXP methodName, SEXP args);
@@ -182,9 +182,8 @@ R_connect(SEXP className, SEXP raiseError)
 */
 __declspec(dllexport)
 SEXP
-R_create(SEXP className)
+R_create(SEXP className, SEXP scontext)
 {
-  DWORD context = CLSCTX_SERVER;
   SEXP ans;
   CLSID classId;
   IID refId = IID_IDispatch;
@@ -193,6 +192,8 @@ R_create(SEXP className)
   HRESULT hr = R_getCLSIDFromString(className, &classId);
   if(FAILED(hr))  
     COMError(hr);
+  
+  WORD context = R_integerScalarValue(scontext, 0);
 
   SCODE sc = CoCreateInstance(classId,  punknown,  context, refId, (void **) &unknown);
 

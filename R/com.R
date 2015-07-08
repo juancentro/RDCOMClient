@@ -3,6 +3,11 @@ DispatchMethods <-
  c("Method"= 1, "PropertyGet" = 2, "PropertyPut" = 4)
 storage.mode(DispatchMethods) <- "integer"
 
+Contexts <-
+  c("CLSCTX_INPROC_SERVER" = 1, "CLSCTX_LOCAL_SERVER" = 4, "CLSCTX_REMOTE_SERVER" = 8, "CLSCTX_ACTIVATE_32_BIT_SERVER" = 262144, "CLSCTX_ACTIVATE_64_BIT_SERVER" = 524288)
+Contexts <- c(Contexts, "CLSCTX_SERVER" = Contexts["CLSCTX_INPROC_SERVER"] + Contexts["CLSCTX_LOCAL_SERVER"] + Contexts["CLSCTX_REMOTE_SERVER"])
+storage.mode(Contexts) <- "integer"
+
 .COMInit <-
 function(status = TRUE)
 {
@@ -11,7 +16,7 @@ function(status = TRUE)
 
 
 COMCreate <-
-function(name, ..., existing = TRUE)
+function(name, context = Contexts["CLSCTX_SERVER"], ..., existing = FALSE)
 {
      # Will want to allow for class IDs to be specified here.
  name <-  as.character(name)
@@ -22,7 +27,7 @@ function(name, ..., existing = TRUE)
      return(ans)
  }
 
- ans <- .Call("R_create", name, PACKAGE = "RDCOMClient")
+ ans <- .Call("R_create", name, context, PACKAGE = "RDCOMClient")
  if(is.character(ans))
      stop(ans)
  
